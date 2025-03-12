@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tic Tac Toe Game</title>
+<style>
+  body {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    background: url('download (9).jpeg');
+    color: white;
+    margin: 0;
+    padding: 0;
+  }
+  
+  h1 {
+    font-size: 2em;
+  }
+
+  p {
+    font-size: 1.2em;
+  }
+
+  .board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+    width: 90vw;
+    max-width: 360px;
+    margin: 20px auto;
+    background: #8B4513;
+    padding: 10px;
+    border-radius: 10px;
+  }
+
+  .cell {
+    aspect-ratio: 1/1; /* Keeps squares responsive */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em;
+    cursor: pointer;
+    background-color: #D2691E;
+    color: white;
+    border: 4px solid #A0522D;
+    transition: transform 0.3s;
+  }
+
+  .cell:hover {
+    transform: scale(1.1);
+    background-color: #CD853F;
+  }
+
+  .btn {
+    margin: 10px;
+    padding: 12px 20px;
+    font-size: 1em;
+    border: none;
+    cursor: pointer;
+    background-color: #ff9800;
+    color: white;
+    border-radius: 5px;
+  }
+
+  .btn:hover {
+    background-color: #e68900;
+  }
+
+  #message {
+    font-size: 1.3em;
+    margin-top: 10px;
+  }
+
+  .scoreboard {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    font-size: 1.2em;
+    margin-bottom: 10px;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 600px) {
+    h1 {
+      font-size: 1.8em;
+    }
+    
+    .cell {
+      font-size: 1.5em;
+    }
+    
+    .btn {
+      font-size: 0.9em;
+      padding: 10px 15px;
+    }
+  }
+</style>
+</head>
+<body>
+<h1>Tic Tac Toe</h1>
+<p>Player <span id="currentPlayer">X</span>'s Turn</p>
+
+<div class="scoreboard">
+  <div>X Wins: <span id="xScore">0</span></div>
+  <div>O Wins: <span id="oScore">0</span></div>
+</div>
+
+<div class="board" id="board"></div>
+<p id="message"></p>
+
+<button class="btn" onclick="resetGame()">Restart Game</button>
+<button class="btn" id="musicBtn" onclick="toggleMusic()">Pause Music</button>
+
+<audio id="bgMusic" loop>
+  <source src="https://www.bensound.com/bensound-music/bensound-acousticbreeze.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="clickSound">
+  <source src="https://www.fesliyanstudios.com/play-mp3/387" type="audio/mpeg">
+</audio>
+
+<script>
+  const board = document.getElementById("board");
+  const message = document.getElementById("message");
+  const currentPlayerDisplay = document.getElementById("currentPlayer");
+  const xScoreDisplay = document.getElementById("xScore");
+  const oScoreDisplay = document.getElementById("oScore");
+  const clickSound = document.getElementById("clickSound");
+
+  let currentPlayer = "X";
+  let cells = Array(9).fill(null);
+  let scores = { X: 0, O: 0 };
+  let gameOver = false;
+  
+  let bgMusic = document.getElementById("bgMusic");
+  bgMusic.play();
+
+  function checkWinner() {
+    const winningCombinations = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8],
+      [0, 3, 6], [1, 4, 7], [2, 5, 8],
+      [0, 4, 8], [2, 4, 6]
+    ];
+    for (let combination of winningCombinations) {
+      const [a, b, c] = combination;
+      if (cells[a] && cells[a] === cells[b] && cells[a] === cells[c]) {
+        return cells[a];
+      }
+    }
+    return cells.includes(null) ? null : "Draw";
+  }
+
+  function handleClick(index) {
+    if (cells[index] || gameOver) return;
+    
+    clickSound.play(); // Play click sound
+    cells[index] = currentPlayer;
+    render();
+    
+    let winner = checkWinner();
+    if (winner) {
+      message.textContent = winner === "Draw" ? "It's a Draw!" : `${winner} Wins!`;
+      gameOver = true;
+      if (winner !== "Draw") {
+        scores[winner]++;
+        updateScores();
+      }
+    } else {
+      currentPlayer = currentPlayer === "X" ? "O" : "X";
+      currentPlayerDisplay.textContent = currentPlayer;
+    }
+  }
+
+  function render() {
+    board.innerHTML = "";
+    cells.forEach((value, index) => {
+      const cell = document.createElement("div");
+      cell.classList.add("cell");
+      cell.textContent = value;
+      cell.onclick = () => handleClick(index);
+      board.appendChild(cell);
+    });
+  }
+
+  function resetGame() {
+    cells.fill(null);
+    currentPlayer = "X";
+    message.textContent = "";
+    gameOver = false;
+    currentPlayerDisplay.textContent = currentPlayer;
+    render();
+  }
+
+  function updateScores() {
+    xScoreDisplay.textContent = scores.X;
+    oScoreDisplay.textContent = scores.O;
+  }
+
+  function toggleMusic() {
+    if (bgMusic.paused) {
+      bgMusic.play();
+      document.getElementById("musicBtn").textContent = "Pause Music";
+    } else {
+      bgMusic.pause();
+      document.getElementById("musicBtn").textContent = "Play Music";
+    }
+  }
+
+  render();
+</script>
+</body>
+</html>
